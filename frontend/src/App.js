@@ -12,8 +12,8 @@ function App() {
   const visNetwork = useRef(null);
 
   const modelOptions = [
-    { value: 'phi-3-mini-4k', label: 'Local Foundry Phi 3 Mini 4k' },
-    { value: 'deepseek-r1-7b', label: 'Local Foundry Deepseek R1 7b' },
+    { value: 'phi-3-mini-4k', label: 'Foundry Local Phi 3 Mini 4k' },
+    { value: 'deepseek-r1-7b', label: 'Foundry Local Deepseek R1 7b' },
     { value: 'model-router', label: 'Azure OpenAI Model Router' },
     // Add more as needed
   ];
