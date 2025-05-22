@@ -4,4 +4,5 @@ pydantic
 aiohttp
 requests
 openai
-foundry-local
+foundry-local-sdk
+python-dotenv
