@@ -6,3 +6,4 @@ requests
 openai
 foundry-local-sdk
 python-dotenv
+semantic-kernel

@@ -1,6 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Network } from 'vis-network/standalone';
 import './App.css';
+
+
 
 function App() {
   const [query, setQuery] = useState('Microsoft');
@@ -15,60 +18,51 @@ function App() {
     { value: 'phi-3-mini-4k', label: 'Foundry Local Phi 3 Mini 4k' },
     { value: 'deepseek-r1-7b', label: 'Foundry Local Deepseek R1 7b' },
     { value: 'model-router', label: 'Azure OpenAI Model Router' },
+    { value: 'gpt-4.1', label: 'Azure OpenAI GPT-4.1' },
     // Add more as needed
   ];
 
-  // LLM-only: fetch brands from backend LLM
+  // Shared fetch function for all endpoints
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 
-  const fetchLlmBrands = async (companyLabel, model) => {
+  const fetchBrandsFromEndpoint = async (endpoint, company, model, extraBody = {}, resultField = 'selectedBrands') => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${backendUrl}/api/select-brands`, {
+      const response = await fetch(`${backendUrl}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company: companyLabel, brands: [], model }),
+        body: JSON.stringify({ company, model, ...extraBody }),
       });
       if (!response.ok) {
-        if (response.status === 502 || response.status === 503 || response.status === 504) {
-          setError('The backend is not available. Please ensure the model server is running.');
-        } else {
-          setError(`Backend error: ${response.status} ${response.statusText}`);
-        }
-        return [];
+        setError(`Backend error: ${response.status} ${response.statusText}`);
+        return null;
       }
       const data = await response.json();
       if (data.error) {
         setError('Backend error: ' + data.error);
-        return [];
+        return null;
       }
-      if (data.selectedBrands) {
-        // Always expect an array of objects with 'name' and 'type'
-        let brands = data.selectedBrands;
-        // Defensive: if it's a string, try to parse as JSON
-        if (typeof brands === 'string') {
-          try {
-            brands = JSON.parse(brands);
-          } catch {
-            // fallback: comma-separated string
-            brands = brands.split(',').map(b => ({ name: b.trim(), type: 'brand' }));
-          }
+      let brands = data[resultField] || data.result;
+      // Defensive: if it's a string, try to parse as JSON
+      if (typeof brands === 'string') {
+        try {
+          brands = JSON.parse(brands);
+        } catch {
+          // fallback: comma-separated string
+          brands = brands.split(',').map(b => ({ name: b.trim(), type: 'brand' }));
         }
-        // If it's an array of strings, convert to array of objects
-        if (Array.isArray(brands) && typeof brands[0] === 'string') {
-          brands = brands.map(b => ({ name: b, type: 'brand' }));
-        }
-        // If it's not an array, fallback to empty
-        if (!Array.isArray(brands)) brands = [];
-        return brands;
-      } else {
-        setError('No brands returned from LLM.');
-        return [];
       }
+      // If it's an array of strings, convert to array of objects
+      if (Array.isArray(brands) && typeof brands[0] === 'string') {
+        brands = brands.map(b => ({ name: b, type: 'brand' }));
+      }
+      // If it's not an array, fallback to empty
+      if (!Array.isArray(brands)) brands = [];
+      return brands;
     } catch (err) {
       setError('Could not reach backend. Is the backend server running?\n' + err.message);
-      return [];
+      return null;
     } finally {
       setLoading(false);
     }
@@ -178,13 +172,20 @@ function App() {
     e.preventDefault();
     if (!query.trim()) return;
     console.log('[SEARCH] Search button clicked. Query:', query, 'Mode:', searchMode);
+    let brands = null;
     if (searchMode === 'llm') {
-      const brands = await fetchLlmBrands(query.trim(), model);
-      const graphData = buildLlmGraph(query.trim(), brands);
-      console.log('[SEARCH] LLM Graph data:', graphData);
-      renderGraph(graphData);
+      brands = await fetchBrandsFromEndpoint('/api/llm-only', query.trim(), model, { brands: [] }, 'selectedBrands');
+    } else if (searchMode === 'chat-completion-agent') {
+      brands = await fetchBrandsFromEndpoint('/api/chat-completion-agent', query.trim(), model, {}, 'result');
+    } else if (searchMode === 'semantic-kernel-agent') {
+      brands = await fetchBrandsFromEndpoint('/api/semantic-kernel-agent', query.trim(), model, {}, 'result');
     } else {
-      alert('Only LLM mode is implemented in this version.');
+      alert('Only LLM and Agent modes are implemented in this version.');
+      return;
+    }
+    if (brands) {
+      const graphData = buildLlmGraph(query.trim(), brands);
+      renderGraph(graphData);
     }
   };
 
@@ -192,7 +193,7 @@ function App() {
   useEffect(() => {
     (async () => {
       if (searchMode === 'llm') {
-        const brands = await fetchLlmBrands(query.trim(), model);
+        const brands = await fetchBrandsFromEndpoint('/api/llm-only', query.trim(), model, { brands: [] }, 'selectedBrands');
         const graphData = buildLlmGraph(query.trim(), brands);
         renderGraph(graphData);
       }
@@ -212,6 +213,17 @@ function App() {
           style={{ width: 300, fontSize: 16 }}
         />
         <select
+          value={searchMode}
+          onChange={e => setSearchMode(e.target.value)}
+          style={{ marginLeft: 10, fontSize: 16 }}
+        >
+          <option value="llm">LLM Only</option>
+          <option value="chat-completion-agent">ChatCompletionAgent</option>
+          <option value="semantic-kernel-agent">Semantic Kernel Agent</option>
+          <option value="wikidata" disabled>Wikidata Only (not implemented)</option>
+          <option value="hybrid" disabled>Hybrid (not implemented)</option>
+        </select>
+        <select
           value={model}
           onChange={e => setModel(e.target.value)}
           style={{ marginLeft: 10, fontSize: 16 }}
@@ -219,15 +231,6 @@ function App() {
           {modelOptions.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
-        </select>
-        <select
-          value={searchMode}
-          onChange={e => setSearchMode(e.target.value)}
-          style={{ marginLeft: 10, fontSize: 16 }}
-        >
-          <option value="llm">LLM Only</option>
-          <option value="wikidata" disabled>Wikidata Only (not implemented)</option>
-          <option value="hybrid" disabled>Hybrid (not implemented)</option>
         </select>
         <button type="submit" style={{ marginLeft: 10, fontSize: 16 }}>Search</button>
       </form>
