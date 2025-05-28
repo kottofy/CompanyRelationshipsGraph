@@ -24,14 +24,12 @@ async def get_company_graph(qid: str):
       {{
         ?company wdt:P355 ?relatedQid. BIND("subsidiary" AS ?relation)
       }} UNION {{
-        ?company wdt:P127 ?relatedQid. BIND("owned_brand" AS ?relation)
-      }} UNION {{
         ?company wdt:P749 ?relatedQid. BIND("parent" AS ?relation)
       }} UNION {{
         ?relatedQid wdt:P355 ?company. BIND("parent_of" AS ?relation)
       }}
       OPTIONAL {{ ?relatedQid wdt:P154 ?logo. }}
-      SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
+      OPTIONAL {{ ?relatedQid rdfs:label ?relatedLabel . FILTER (lang(?relatedLabel) = "en") }}
     }}
     """
     url = "https://query.wikidata.org/sparql"

@@ -1,9 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Network } from 'vis-network/standalone';
 import './App.css';
-
-
 
 function App() {
   const [query, setQuery] = useState('Microsoft');
@@ -14,18 +11,24 @@ function App() {
   const networkRef = useRef(null);
   const visNetwork = useRef(null);
 
-  const modelOptions = [
-    { value: 'phi-3-mini-4k', label: 'Foundry Local Phi 3 Mini 4k' },
-    { value: 'deepseek-r1-7b', label: 'Foundry Local Deepseek R1 7b' },
-    { value: 'model-router', label: 'Azure OpenAI Model Router' },
-    { value: 'gpt-4.1', label: 'Azure OpenAI GPT-4.1' },
+  // Model options with allowed modes
+  const allModelOptions = [
+    { value: 'phi-3-mini-4k', label: 'Foundry Local Phi 3 Mini 4k', modes: ['llm'] },
+    { value: 'deepseek-r1-7b', label: 'Foundry Local Deepseek R1 7b', modes: ['llm'] },
+    { value: 'model-router', label: 'Azure OpenAI Model Router', modes: ['llm', 'semantic-kernel-agent'] },
+    { value: 'gpt-4.1', label: 'Azure OpenAI GPT-4.1', modes: ['chat-completion-agent', 'semantic-kernel-agent'] },
     // Add more as needed
   ];
+
+  // Filter model options based on selected search mode
+  const filteredModelOptions = allModelOptions.filter(opt =>
+    opt.modes.includes(searchMode)
+  );
 
   // Shared fetch function for all endpoints
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8081';
 
-  const fetchBrandsFromEndpoint = async (endpoint, company, model, extraBody = {}, resultField = 'selectedBrands') => {
+  const fetchCompaniesFromEndpoint = async (endpoint, company, model, extraBody = {}, resultField = 'result') => {
     setLoading(true);
     setError(null);
     try {
@@ -43,23 +46,23 @@ function App() {
         setError('Backend error: ' + data.error);
         return null;
       }
-      let brands = data[resultField] || data.result;
+      let companies = data[resultField] || data.result;
       // Defensive: if it's a string, try to parse as JSON
-      if (typeof brands === 'string') {
+      if (typeof companies === 'string') {
         try {
-          brands = JSON.parse(brands);
+          companies = JSON.parse(companies);
         } catch {
           // fallback: comma-separated string
-          brands = brands.split(',').map(b => ({ name: b.trim(), type: 'brand' }));
+          companies = companies.split(',').map(b => ({ name: b.trim(), type: 'company' }));
         }
       }
       // If it's an array of strings, convert to array of objects
-      if (Array.isArray(brands) && typeof brands[0] === 'string') {
-        brands = brands.map(b => ({ name: b, type: 'brand' }));
+      if (Array.isArray(companies) && typeof companies[0] === 'string') {
+        companies = companies.map(b => ({ name: b, type: 'company' }));
       }
       // If it's not an array, fallback to empty
-      if (!Array.isArray(brands)) brands = [];
-      return brands;
+      if (!Array.isArray(companies)) companies = [];
+      return companies;
     } catch (err) {
       setError('Could not reach backend. Is the backend server running?\n' + err.message);
       return null;
@@ -69,19 +72,19 @@ function App() {
   };
 
   // Build vis-network data for LLM-only mode
-  const buildLlmGraph = (companyLabel, brands) => {
-    if (!brands || brands.length === 0) return { nodes: [], edges: [] };
+  const buildLlmGraph = (companyLabel, companies) => {
+    if (!companies || companies.length === 0) return { nodes: [], edges: [] };
 
     // Find the main company node (type: 'company'), fallback to matching label, then first element
-    let companyNode = brands.find(b => b.type && b.type.toLowerCase() === 'company')
-      || brands.find(b => b.name.toLowerCase() === companyLabel.toLowerCase())
-      || brands[0];
+    let companyNode = companies.find(b => b.type && b.type.toLowerCase() === 'company')
+      || companies.find(b => b.name.toLowerCase() === companyLabel.toLowerCase())
+      || companies[0];
     const companyId = 'company';
 
     // Assign unique IDs to all nodes
     const nodeMap = new Map();
     let nodeIdx = 0;
-    brands.forEach((b) => {
+    companies.forEach((b) => {
       if (b === companyNode) {
         nodeMap.set(b, companyId);
       } else {
@@ -90,7 +93,7 @@ function App() {
     });
 
     // Build nodes, using logo if available
-    const nodes = brands.map((b) => ({
+    const nodes = companies.map((b) => ({
       id: nodeMap.get(b),
       label: b.name,
       shape: b.logo ? 'circularImage' : 'ellipse',
@@ -99,8 +102,8 @@ function App() {
       font: { size: 18, vadjust: 50 },
     }));
 
-    // Build edges: subsidiaries/brands from company to node, parent from node to company
-    const edges = brands
+    // Build edges: subsidiaries/companies from company to node, parent from node to company
+    const edges = companies
       .filter(b => b !== companyNode)
       .map((b) => {
         if (b.type && b.type.toLowerCase() === 'parent') {
@@ -111,7 +114,7 @@ function App() {
             label: 'parent',
           };
         } else {
-          // Subsidiary/brand: edge from company to node
+          // Subsidiary/company: edge from company to node
           return {
             from: companyId,
             to: nodeMap.get(b),
@@ -172,19 +175,21 @@ function App() {
     e.preventDefault();
     if (!query.trim()) return;
     console.log('[SEARCH] Search button clicked. Query:', query, 'Mode:', searchMode);
-    let brands = null;
+    let companies = null;
     if (searchMode === 'llm') {
-      brands = await fetchBrandsFromEndpoint('/api/llm-only', query.trim(), model, { brands: [] }, 'selectedBrands');
+      companies = await fetchCompaniesFromEndpoint('/api/llm', query.trim(), model, { companies: [] }, 'result');
     } else if (searchMode === 'chat-completion-agent') {
-      brands = await fetchBrandsFromEndpoint('/api/chat-completion-agent', query.trim(), model, {}, 'result');
+      companies = await fetchCompaniesFromEndpoint('/api/chat-completion-agent', query.trim(), model, {}, 'result');
     } else if (searchMode === 'semantic-kernel-agent') {
-      brands = await fetchBrandsFromEndpoint('/api/semantic-kernel-agent', query.trim(), model, {}, 'result');
+      companies = await fetchCompaniesFromEndpoint('/api/semantic-kernel-agent', query.trim(), model, {}, 'result');
+    } else if (searchMode === 'wikidata') {
+      companies = await fetchCompaniesFromEndpoint('/api/wikidata', query.trim(), model, {}, 'result');
     } else {
       alert('Only LLM and Agent modes are implemented in this version.');
       return;
     }
-    if (brands) {
-      const graphData = buildLlmGraph(query.trim(), brands);
+    if (companies) {
+      const graphData = buildLlmGraph(query.trim(), companies);
       renderGraph(graphData);
     }
   };
@@ -193,13 +198,20 @@ function App() {
   useEffect(() => {
     (async () => {
       if (searchMode === 'llm') {
-        const brands = await fetchBrandsFromEndpoint('/api/llm-only', query.trim(), model, { brands: [] }, 'selectedBrands');
-        const graphData = buildLlmGraph(query.trim(), brands);
+        const companies = await fetchCompaniesFromEndpoint('/api/llm', query.trim(), model, { companies: [] }, 'result');
+        const graphData = buildLlmGraph(query.trim(), companies);
         renderGraph(graphData);
       }
     })();
     // eslint-disable-next-line
   }, []);
+
+    // Automatically update model when searchMode changes to ensure a valid model is selected
+  useEffect(() => {
+    if (filteredModelOptions.length > 0) {
+      setModel(filteredModelOptions[0].value);
+    }
+  }, [searchMode]);
 
   return (
     <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -220,18 +232,19 @@ function App() {
           <option value="llm">LLM Only</option>
           <option value="chat-completion-agent">ChatCompletionAgent</option>
           <option value="semantic-kernel-agent">Semantic Kernel Agent</option>
-          <option value="wikidata" disabled>Wikidata Only (not implemented)</option>
-          <option value="hybrid" disabled>Hybrid (not implemented)</option>
+          <option value="wikidata" >Wikidata Only</option>
         </select>
-        <select
-          value={model}
-          onChange={e => setModel(e.target.value)}
-          style={{ marginLeft: 10, fontSize: 16 }}
-        >
-          {modelOptions.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
+        {searchMode !== 'wikidata' && filteredModelOptions.length > 0 && (
+          <select
+            value={model}
+            onChange={e => setModel(e.target.value)}
+            style={{ marginLeft: 10, fontSize: 16 }}
+          >
+            {filteredModelOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        )}
         <button type="submit" style={{ marginLeft: 10, fontSize: 16 }}>Search</button>
       </form>
       {loading && <div>Loading...</div>}
