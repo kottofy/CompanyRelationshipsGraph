@@ -3,6 +3,7 @@ import './App.css';
 import SearchForm from './components/SearchForm';
 import CompanyGraph from './components/CompanyGraph';
 import { fetchCompanyGraph } from './services/api';
+import { allModelOptions } from './constants';
 
 function App() {
   const [query, setQuery] = useState('Microsoft');
@@ -12,14 +13,7 @@ function App() {
   const [searchMode, setSearchMode] = useState('llm');
   const [graphData, setGraphData] = useState(null);
 
-  // Model options with allowed modes
-  const allModelOptions = [
-    { value: 'phi-3-mini-4k', label: 'Foundry Local Phi 3 Mini 4k', modes: ['llm'] },
-    { value: 'deepseek-r1-7b', label: 'Foundry Local Deepseek R1 7b', modes: ['llm'] },
-    { value: 'model-router', label: 'Azure OpenAI Model Router', modes: ['llm', 'semantic-kernel-agent'] },
-    { value: 'gpt-4.1', label: 'Azure OpenAI GPT-4.1', modes: ['chat-completion-agent', 'semantic-kernel-agent'] },
-    // Add more as needed
-  ];
+
 
   // Filter model options based on selected search mode
   const filteredModelOptions = allModelOptions.filter(opt =>
