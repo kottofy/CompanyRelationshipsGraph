@@ -14,32 +14,43 @@ export async function fetchCompanyGraph(params) {
   let endpoint;
   switch (params.mode) {
     case 'wikidata':
-      endpoint = '/api/wikidata';
+      endpoint = `/api/wikidata/${encodeURIComponent(params.company)}`;
       break;
     case 'foundry-local':
-      endpoint = '/api/foundry-local';
+      endpoint = `/api/foundry-local/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;
     case 'azure-open-ai':
-      endpoint = '/api/azure-open-ai';
+      endpoint = `/api/azure-open-ai/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;
     case 'chat-completion-agent':
-      endpoint = '/api/chat-completion-agent';
+      endpoint = `/api/chat-completion-agent/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;
     case 'semantic-kernel-agent':
-      endpoint = '/api/semantic-kernel-agent';
+      endpoint = `/api/semantic-kernel-agent/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;
     default:
       throw new Error(`Unknown mode: ${params.mode}`);
   }
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-  });
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+  // 60 seconds timeout (60000 ms)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+    return response.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out after 60 seconds.');
+    }
+    throw err;
   }
-  return response.json();
 }
 
 /**

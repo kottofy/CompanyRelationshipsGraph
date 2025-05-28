@@ -10,11 +10,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [model, setModel] = useState('phi-3-mini-4k');
-  // Default to foundry-local for backward compatibility
   const [searchMode, setSearchMode] = useState('foundry-local');
   const [graphData, setGraphData] = useState(null);
-
-
 
   // Filter model options based on selected search mode
   const filteredModelOptions = allModelOptions.filter(opt =>
@@ -57,12 +54,6 @@ function App() {
     return { nodes, edges };
   };
 
-  // Build vis-network data for LLM-only mode
-
-
-  // Render the graph
-
-
   // Handle search using centralized API service
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -97,41 +88,7 @@ function App() {
     }
   };
 
-  // Initial render for default company
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const params = {
-          mode: searchMode,
-          model,
-          company: query.trim(),
-        };
-        const data = await fetchCompanyGraph(params);
-        let companies = data.result || data.selectedBrands || [];
-        if (typeof companies === 'string') {
-          try {
-            companies = JSON.parse(companies);
-          } catch {
-            companies = companies.split(',').map(b => ({ name: b.trim(), type: 'company' }));
-          }
-        }
-        if (Array.isArray(companies) && typeof companies[0] === 'string') {
-          companies = companies.map(b => ({ name: b, type: 'company' }));
-        }
-        if (!Array.isArray(companies)) companies = [];
-        setGraphData(buildGraph(query.trim(), companies));
-      } catch (err) {
-        setError('Could not reach backend. ' + err.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-    // eslint-disable-next-line
-  }, []);
-
-    // Automatically update model when searchMode changes to ensure a valid model is selected
+  // Automatically update model when searchMode changes to ensure a valid model is selected
   useEffect(() => {
     if (
       filteredModelOptions.length > 0 &&

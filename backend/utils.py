@@ -18,12 +18,17 @@ def parse_companies_result(result):
     except Exception as e:
         return {"error": f"Could not parse companies result: {str(e)}"}
 
-
-def validate_company_model_request(req):
-    if not hasattr(req, 'company') or not req.company or not isinstance(req.company, str) or not req.company.strip():
-        return {"error": "Company must be a non-empty string."}
-    if not hasattr(req, 'model') or not req.model or not isinstance(req.model, str) or not req.model.strip():
-        return {"error": "Model must be a non-empty string."}
+def validate_company_model_request(req=None, company=None, model=None):
+    # If called with a request object (legacy), extract company/model from it
+    if req is not None:
+        company = getattr(req, 'company', None)
+        model = getattr(req, 'model', None)
+    if company is not None:
+        if not isinstance(company, str) or not company.strip():
+            return {"error": "Company must be a non-empty string."}
+    if model is not None:
+        if not isinstance(model, str) or not model.strip():
+            return {"error": "Model must be a non-empty string."}
     return None
 
 def get_azure_openai_env():
