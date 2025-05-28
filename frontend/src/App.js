@@ -10,7 +10,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [model, setModel] = useState('phi-3-mini-4k');
-  const [searchMode, setSearchMode] = useState('llm');
+  // Default to foundry-local for backward compatibility
+  const [searchMode, setSearchMode] = useState('foundry-local');
   const [graphData, setGraphData] = useState(null);
 
 
@@ -132,7 +133,10 @@ function App() {
 
     // Automatically update model when searchMode changes to ensure a valid model is selected
   useEffect(() => {
-    if (filteredModelOptions.length > 0) {
+    if (
+      filteredModelOptions.length > 0 &&
+      !filteredModelOptions.some(opt => opt.value === model)
+    ) {
       setModel(filteredModelOptions[0].value);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,7 +144,7 @@ function App() {
 
   return (
     <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <h2>Company Graph Visualizer</h2>
+      <h2>Company Relationships Graph</h2>
       <SearchForm
         query={query}
         setQuery={setQuery}

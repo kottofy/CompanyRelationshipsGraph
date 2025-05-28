@@ -87,7 +87,7 @@ async def chat_completion_agent_endpoint(req: CompanyGraphRequest):
 
     if not response or not response.content.content:
         return {"error": "No response from the agent."}
-    result = response.content.content.strip()
+    result = response.content.content
     # Ensure response is a valid JSON
     companies = parse_companies_result(result)
     # Return the response content
@@ -126,49 +126,63 @@ async def semantic_kernel_agent_endpoint(req: CompanyGraphRequest):
 
     if not response or not response.content.content:
         return {"error": "No response from the agent."}
-    result = response.content.content.strip()
+    result = response.content.content
     # Ensure response is a valid JSON
     companies = parse_companies_result(result)
     # Return the response content
     return {"result": companies}
 
-
-@app.post("/api/llm")
-async def llm_only(req: CompanyGraphRequest):
+@app.post("/api/azure-open-ai")
+async def azure_open_ai(req: CompanyGraphRequest):
     try:
         validation_error = validate_company_model_request(req)
         if validation_error:
             return validation_error
         user_prompt = build_user_prompt(req.company)
-        if req.model == "model-router":
-            # Use Azure OpenAI
-            azure_endpoint, azure_key, env_error = get_azure_openai_env()
-            azure_deployment = req.model
-            if env_error:
-                return env_error
-            client = openai.AzureOpenAI(
-                api_key=azure_key,
-                api_version="2023-05-15",
-                azure_endpoint=azure_endpoint
-            )
-            completion = client.chat.completions.create(
-                model=azure_deployment,
-                messages=[{"role": "user", "content": user_prompt}],
-                max_tokens=4096
-            )
-            result = completion.choices[0].message.content
-        else:
-            manager = FoundryLocalManager(req.model)
-            client = openai.OpenAI(
-                base_url=manager.endpoint,
-                api_key=manager.api_key  # API key is not required for local usage
-            )
-            completion = client.chat.completions.create(
-                model=manager.get_model_info(req.model).id,
-                messages=[{"role": "user", "content": user_prompt}],
-                max_tokens=4096
-            )
-            result = completion.choices[0].message.content
+        deployment_name = req.model
+
+        # Use Azure OpenAI
+        azure_endpoint, azure_key, env_error = get_azure_openai_env()
+        azure_deployment = deployment_name
+        if env_error:
+            return env_error
+        client = openai.AzureOpenAI(
+            api_key=azure_key,
+            api_version="2023-05-15",
+            azure_endpoint=azure_endpoint
+        )
+        completion = client.chat.completions.create(
+            model=azure_deployment,
+            messages=[{"role": "user", "content": user_prompt}],
+            max_tokens=4096
+        )
+        result = completion.choices[0].message.content
+
+        companies = parse_companies_result(result)
+        return {"result": companies}
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.post("/api/foundry-local")
+async def foundry_local(req: CompanyGraphRequest):
+    try:
+        validation_error = validate_company_model_request(req)
+        if validation_error:
+            return validation_error
+        user_prompt = build_user_prompt(req.company)
+        deployment_name = req.model
+        # Use Foundry Local Manager
+        manager = FoundryLocalManager(deployment_name)
+        client = openai.OpenAI(
+            base_url=manager.endpoint,
+            api_key=manager.api_key  # API key is not required for local usage
+        )
+        completion = client.chat.completions.create(
+            model=manager.get_model_info(deployment_name).id,
+            messages=[{"role": "user", "content": user_prompt}],
+            max_tokens=4096
+        )
+        result = completion.choices[0].message.content
 
         companies = parse_companies_result(result)
         return {"result": companies}

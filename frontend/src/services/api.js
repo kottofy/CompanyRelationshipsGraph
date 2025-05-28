@@ -9,14 +9,18 @@ const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
  * @param {Object} params - The search parameters (mode, model, company, etc.)
  * @returns {Promise<Object>} - The API response
  */
+
 export async function fetchCompanyGraph(params) {
   let endpoint;
   switch (params.mode) {
     case 'wikidata':
       endpoint = '/api/wikidata';
       break;
-    case 'llm':
-      endpoint = '/api/llm';
+    case 'foundry-local':
+      endpoint = '/api/foundry-local';
+      break;
+    case 'azure-open-ai':
+      endpoint = '/api/azure-open-ai';
       break;
     case 'chat-completion-agent':
       endpoint = '/api/chat-completion-agent';

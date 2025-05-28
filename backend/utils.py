@@ -5,18 +5,18 @@ import os
 def parse_companies_result(result):
     """
     Parse a result string into a list of dicts with 'name', 'type', and 'logo'.
-    Handles both JSON and comma-separated string formats.
+    Handles only valid JSON format. Returns an error dict if parsing fails.
+    Also strips whitespace from the result string.
     """
+    result = result.strip() if isinstance(result, str) else result
     try:
         companies = json.loads(result)
         # Validate: ensure each item is an object with 'name', 'type', and 'logo'
         if not (isinstance(companies, list) and all(isinstance(c, dict) and 'name' in c and 'type' in c and 'logo' in c for c in companies)):
             raise ValueError('LLM did not return expected format')
-    except Exception:
-        # fallback: treat as comma-separated list of names, type 'company', logo null
-        companies = [c.strip() for c in result.split(',') if c.strip()]
-        companies = [{"name": c, "type": "company", "logo": None} for c in companies]
-    return companies
+        return companies
+    except Exception as e:
+        return {"error": f"Could not parse companies result: {str(e)}"}
 
 
 def validate_company_model_request(req):

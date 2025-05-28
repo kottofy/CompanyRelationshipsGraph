@@ -29,7 +29,8 @@ export default function SearchForm({
         aria-label="Search mode"
         disabled={loading}
       >
-        <option value="llm">LLM Only</option>
+        <option value="foundry-local">Foundry Local LLM</option>
+        <option value="azure-open-ai">Azure OpenAI LLM</option>
         <option value="chat-completion-agent">ChatCompletionAgent</option>
         <option value="semantic-kernel-agent">Semantic Kernel Agent</option>
         <option value="wikidata">Wikidata Only</option>
