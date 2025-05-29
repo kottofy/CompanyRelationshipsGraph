@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Full Stack: Frontend + Backend",
+            "configurations": [
+                "Debug FastAPI Backend",
+                "Debug React Frontend"
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Debug FastAPI Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload",
+                "--port",
+                "8081"
+            ],
+            "jinja": true,
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/backend",
+            "preLaunchTask": "Setup Python venv and install backend dependencies"
+        },
+        {
+            "name": "Debug React Frontend",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}/frontend/src",
+            "cwd": "${workspaceFolder}/frontend",
+            "preLaunchTask": "Start React Frontend",
+        }
+    ]
+}
