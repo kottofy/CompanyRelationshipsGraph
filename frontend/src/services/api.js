@@ -22,6 +22,9 @@ export async function fetchCompanyGraph(params) {
     case 'azure-open-ai':
       endpoint = `/api/azure-open-ai/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;
+    case 'azure-foundry-agent':
+      endpoint = `/api/azure-foundry-agent/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
+      break;
     case 'chat-completion-agent':
       endpoint = `/api/chat-completion-agent/${encodeURIComponent(params.model)}/${encodeURIComponent(params.company)}`;
       break;

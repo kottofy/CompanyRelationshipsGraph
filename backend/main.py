@@ -1,4 +1,6 @@
 from semantic_kernel.agents import ChatCompletionAgent
+from semantic_kernel.agents import AzureAIAgent, AzureAIAgentThread, AzureAIAgentSettings
+from azure.identity.aio import DefaultAzureCredential
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.kernel import Kernel
 from fastapi import FastAPI
@@ -184,5 +186,71 @@ async def foundry_local(model: str, company: str):
         if isinstance(companies, dict) and "error" in companies:
             return JSONResponse({"error": companies["error"]}, status_code=422)
         return {"result": companies, "inference_time_seconds": elapsed}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# Endpoint: Foundry Agent (using AzureAIAgent from Semantic Kernel)
+@app.get("/api/azure-foundry-agent/{model}/{company}")
+async def azure_foundry_agent_endpoint(model: str, company: str):
+    try:
+        validation_error = validate_company_model_request(company=company, model=model)
+        if validation_error:
+            return validation_error
+
+        user_prompt = build_user_prompt(company)
+        ai_agent_settings = AzureAIAgentSettings(model_deployment_name=model)  # Reads from .env or environment
+
+        async with (
+            DefaultAzureCredential() as creds,
+            AzureAIAgent.create_client(
+                credential=creds,
+                endpoint=ai_agent_settings.endpoint
+                ) as client,
+        ):
+            # OPTION 1 - Create an agent on the Azure AI agent service
+            # agent_definition = await client.agents.create_agent(
+            #     model=model,
+            #     name="CompanyGraphFoundryAgent",
+            #     instructions="You are a helpful assistant for company graph queries. Use your tools to answer questions about company relationships.",
+            # )
+
+            # agent = AzureAIAgent(
+            #     client=client,
+            #     definition=agent_definition,
+            # )
+
+
+            # OPTION 2 - Use an existing agent if available
+            agent_definition = await client.agents.get_agent(
+                agent_id=ai_agent_settings.agent_id,
+            )
+
+            agent = AzureAIAgent(
+                client=client,
+                definition=agent_definition,
+            )
+
+            # Create a thread for the agent
+            thread: AzureAIAgentThread = None
+
+            try:
+                # 4. Invoke the agent with the specified message for response
+                response = await agent.get_response(messages=user_prompt, thread=thread)
+                thread = response.thread
+            finally:
+                # 6. Cleanup: Delete the thread and agent
+                await thread.delete() if thread else None
+                # await client.agents.delete_agent(agent.id)
+
+            if not response or not response.content.content:
+                return {"error": "No response from the agent."}
+            result = response.content.content
+
+            companies = parse_companies_result(result)
+
+            if isinstance(companies, dict) and "error" in companies:
+                return JSONResponse({"error": companies["error"]}, status_code=422)
+            return {"result": companies}
     except Exception as e:
         return {"error": str(e)}

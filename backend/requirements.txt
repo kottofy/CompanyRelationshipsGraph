@@ -6,4 +6,5 @@ requests
 openai
 foundry-local-sdk
 python-dotenv
-semantic-kernel
+semantic-kernel[azure]
+azure-identity

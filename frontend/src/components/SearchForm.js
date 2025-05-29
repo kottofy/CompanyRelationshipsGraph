@@ -31,6 +31,7 @@ export default function SearchForm({
       >
         <option value="foundry-local">Foundry Local LLM</option>
         <option value="azure-open-ai">Azure OpenAI LLM</option>
+        <option value="azure-foundry-agent">Azure Foundry Agent</option>
         <option value="chat-completion-agent">ChatCompletionAgent</option>
         <option value="semantic-kernel-agent">Semantic Kernel Agent</option>
         <option value="wikidata">Wikidata Only</option>
