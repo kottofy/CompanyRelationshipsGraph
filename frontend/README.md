@@ -66,9 +66,3 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 - If the graph does not render, ensure the backend is running and accessible at the API base URL.
 - For vis-network issues, ensure it is installed (`npm install vis-network`).
 - For CORS errors, check backend CORS settings.
-
-## License
-MIT
-
----
-For more details, see the main project README or documentation.

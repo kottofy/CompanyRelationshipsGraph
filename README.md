@@ -21,10 +21,10 @@ Company Relationships Graph is a full-stack web application designed to help use
 
 1. Open this folder in [Visual Studio Code](https://code.visualstudio.com/).
 2. Make sure you have the [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extensions installed.
-3. Press <kbd>F5</kbd> or go to the Run & Debug panel and select **Full Stack: Frontend + Backend** to launch both the FastAPI backend and React frontend together.
-   - Alternatively, you can 
-4. The frontend will open at [http://localhost:3000](http://localhost:3000) and the backend at [http://localhost:8081](http://localhost:8081) by default.
-5. Search for a company to explore its ecosystem!
+3. See the [frontend/README.md](./frontend/README.md) and [backend/README.md](./backend/README.md) READMEs for required environment variable setup using .env files.
+4. Press <kbd>F5</kbd> or go to the Run & Debug panel and select **Full Stack: Frontend + Backend** to launch both the FastAPI backend and React frontend together.
+5. The frontend will open at [http://localhost:3000](http://localhost:3000) and the backend at [http://localhost:8081](http://localhost:8081) by default.
+6. Search for a company to explore its ecosystem!
 
 ## Impact
 

@@ -75,9 +75,3 @@ All endpoints return JSON with a list of companies/brands, their types (company,
 - For CORS issues, verify FastAPI CORS middleware settings
 - For Azure/OpenAI errors, check API keys and endpoint URLs
 - For Wikidata issues, ensure network access to Wikidata SPARQL endpoint
-
-## License
-MIT
-
----
-For more details, see the main project README or documentation.
