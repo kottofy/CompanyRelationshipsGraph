@@ -117,6 +117,11 @@ function App() {
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Company Relationships Graph
         </Typography>
+        <Typography variant="body1" align="center" sx={{ mb: 2, color: '#333' }}>
+          Enter a company name to visualize its brands, subsidiaries, and parent relationships as an interactive graph.
+        </Typography>
+      </Paper>
+      <Paper elevation={3} sx={{ p: 3, mb: 3, maxWidth: 900, mx: 'auto', width: '100%' }}>
         <SearchForm
           query={query}
           setQuery={setQuery}
@@ -130,12 +135,10 @@ function App() {
         />
         <Typography variant="body2" sx={{ mb: 1, minHeight: 24, color: '#444', fontStyle: 'italic' }}>
           {selectedModeDescription}
+          {filteredModelOptions.some(opt => opt.value === model) && selectedModelDescription && (
+            <><br />{selectedModelDescription}</>
+          )}
         </Typography>
-        {filteredModelOptions.length > 0 && (
-          <Typography variant="caption" sx={{ mb: 2, minHeight: 20, color: '#666', display: 'block' }}>
-            {selectedModelDescription}
-          </Typography>
-        )}
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
             <CircularProgress />
