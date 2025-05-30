@@ -3,7 +3,7 @@ import './App.css';
 import SearchForm from './components/SearchForm';
 import CompanyGraph from './components/CompanyGraph';
 import { fetchCompanyGraph } from './services/api';
-import { allModelOptions } from './constants';
+import { ALL_MODEL_OPTIONS, SEARCH_MODE_DESCRIPTIONS, MODEL_DESCRIPTIONS } from './constants';
 
 function App() {
   const [query, setQuery] = useState('Microsoft');
@@ -14,7 +14,7 @@ function App() {
   const [graphData, setGraphData] = useState(null);
 
   // Filter model options based on selected search mode
-  const filteredModelOptions = allModelOptions.filter(opt =>
+  const filteredModelOptions = ALL_MODEL_OPTIONS.filter(opt =>
     opt.modes.includes(searchMode)
   );
 
@@ -99,6 +99,12 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchMode, filteredModelOptions]);
 
+  // Show a short description for the selected search mode
+  const selectedModeDescription = SEARCH_MODE_DESCRIPTIONS[searchMode] || '';
+
+  // Show a short description for the selected model
+  const selectedModelDescription = MODEL_DESCRIPTIONS[model] || '';
+
   return (
     <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <h2>Company Relationships Graph</h2>
@@ -113,6 +119,14 @@ function App() {
         onSubmit={handleSearch}
         loading={loading}
       />
+      <div style={{ margin: '10px 0', minHeight: 24, color: '#444', fontStyle: 'italic' }}>
+        {selectedModeDescription}
+      </div>
+      {filteredModelOptions.length > 0 && (
+        <div style={{ margin: '0 0 10px 0', minHeight: 20, color: '#666', fontSize: 14 }}>
+          {selectedModelDescription}
+        </div>
+      )}
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}
       <CompanyGraph graphData={graphData} setError={setError} />
