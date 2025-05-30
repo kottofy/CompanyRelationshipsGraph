@@ -52,8 +52,12 @@ export default function CompanyGraph({ graphData, setError }) {
       style={{
         flex: 1,
         minHeight: 0,
+        height: '100%',
+        width: '100%',
         border: '1px solid #ccc',
         background: '#fff',
+        overflow: 'hidden',
+        display: 'flex',
       }}
     />
   );

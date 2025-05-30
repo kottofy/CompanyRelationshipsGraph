@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import './App.css';
 import SearchForm from './components/SearchForm';
 import CompanyGraph from './components/CompanyGraph';
@@ -106,31 +112,43 @@ function App() {
   const selectedModelDescription = MODEL_DESCRIPTIONS[model] || '';
 
   return (
-    <div className="App" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <h2>Company Relationships Graph</h2>
-      <SearchForm
-        query={query}
-        setQuery={setQuery}
-        searchMode={searchMode}
-        setSearchMode={setSearchMode}
-        model={model}
-        setModel={setModel}
-        filteredModelOptions={filteredModelOptions}
-        onSubmit={handleSearch}
-        loading={loading}
-      />
-      <div style={{ margin: '10px 0', minHeight: 24, color: '#444', fontStyle: 'italic' }}>
-        {selectedModeDescription}
-      </div>
-      {filteredModelOptions.length > 0 && (
-        <div style={{ margin: '0 0 10px 0', minHeight: 20, color: '#666', fontSize: 14 }}>
-          {selectedModelDescription}
-        </div>
-      )}
-      {loading && <div>Loading...</div>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      <CompanyGraph graphData={graphData} setError={setError} />
-    </div>
+    <Container maxWidth="xl" disableGutters sx={{ minHeight: '100vh', height: '100vh', display: 'flex', flexDirection: 'column', py: 2 }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 3, maxWidth: 900, mx: 'auto', width: '100%' }}>
+        <Typography variant="h4" component="h1" gutterBottom align="center">
+          Company Relationships Graph
+        </Typography>
+        <SearchForm
+          query={query}
+          setQuery={setQuery}
+          searchMode={searchMode}
+          setSearchMode={setSearchMode}
+          model={model}
+          setModel={setModel}
+          filteredModelOptions={filteredModelOptions}
+          onSubmit={handleSearch}
+          loading={loading}
+        />
+        <Typography variant="body2" sx={{ mb: 1, minHeight: 24, color: '#444', fontStyle: 'italic' }}>
+          {selectedModeDescription}
+        </Typography>
+        {filteredModelOptions.length > 0 && (
+          <Typography variant="caption" sx={{ mb: 2, minHeight: 20, color: '#666', display: 'block' }}>
+            {selectedModelDescription}
+          </Typography>
+        )}
+        {loading && (
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
+            <CircularProgress />
+          </div>
+        )}
+        {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
+      </Paper>
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', pb: 2, height: '100%' }}>
+        <Paper elevation={1} sx={{ p: 2, flex: 1, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <CompanyGraph graphData={graphData} setError={setError} />
+        </Paper>
+      </Box>
+    </Container>
   );
 }
 
