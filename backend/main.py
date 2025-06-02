@@ -1,19 +1,20 @@
-from semantic_kernel.agents import ChatCompletionAgent
-from semantic_kernel.agents import AzureAIAgent, AzureAIAgentThread, AzureAIAgentSettings
+
+import json
+import openai
+import time
+
 from azure.identity.aio import DefaultAzureCredential
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from foundry_local import FoundryLocalManager
+from prompts import build_user_prompt
+from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings, AzureAIAgentThread, ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.kernel import Kernel
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import openai
-from foundry_local import FoundryLocalManager
-import json
-import time
-from wikidata_utils import get_wikidata_qid, get_company_graph
-from prompts import build_user_prompt
-from utils import parse_companies_result, validate_company_model_request, get_azure_openai_env
-from dotenv import load_dotenv
+from utils import get_azure_openai_env, parse_companies_result, validate_company_model_request
+from wikidata_utils import get_company_graph, get_wikidata_qid
 
 # Load environment variables from .env if present
 load_dotenv()
