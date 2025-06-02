@@ -3,7 +3,7 @@
 ## Search Modes
 Below are all the search modes a user can select in the CompanyGraph frontend, along with guidance on when and why to use each option.
 
-![Search Form](frontend/screenshots/search_form.png)
+![Search Options](./images/searchoptions.png)
 
 ### 1. **Foundry Local LLM**
 - **Description:** Uses a locally hosted Foundry LLM to infer company-brand relationships.
@@ -64,7 +64,7 @@ What else should we try??
 
 ## Model Options (Summary Table)
 
-![Graph Example](frontend/screenshots/graph_example.png)
+![Graph Example](./images/modeloptions.png)
 
 | Model Value      | Label           | Available In Modes                        |
 |------------------|-----------------|-------------------------------------------|
