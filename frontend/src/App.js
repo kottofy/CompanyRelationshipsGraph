@@ -16,7 +16,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [model, setModel] = useState('phi-3-mini-4k');
-  const [searchMode, setSearchMode] = useState('foundry-local');
+  const [searchMode, setSearchMode] = useState('wikidata');
   const [graphData, setGraphData] = useState(null);
 
   // Filter model options based on selected search mode

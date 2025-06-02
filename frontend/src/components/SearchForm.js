@@ -38,12 +38,12 @@ export default function SearchForm({
           label="Search mode"
           onChange={e => setSearchMode(e.target.value)}
         >
+          <MenuItem value="wikidata">Wikidata Only</MenuItem>
           <MenuItem value="foundry-local">Foundry Local LLM</MenuItem>
           <MenuItem value="azure-open-ai">Azure OpenAI LLM</MenuItem>
-          <MenuItem value="azure-foundry-agent">Azure Foundry Agent</MenuItem>
           <MenuItem value="chat-completion-agent">ChatCompletionAgent</MenuItem>
           <MenuItem value="semantic-kernel-agent">Semantic Kernel Agent</MenuItem>
-          <MenuItem value="wikidata">Wikidata Only</MenuItem>
+          <MenuItem value="azure-foundry-agent">Azure Foundry Agent</MenuItem>
         </Select>
       </FormControl>
       {searchMode !== 'wikidata' && filteredModelOptions.length > 0 && (
