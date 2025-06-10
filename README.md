@@ -16,6 +16,7 @@ Company Relationships Graph is a full-stack web application designed to help use
 - **frontend/** — React app for the user interface and graph visualization ([see frontend/README.md](./frontend/README.md))
 - **backend/** — FastAPI server for data aggregation, AI/LLM integration, and API endpoints ([see backend/README.md](./backend/README.md))
 - **docs/AI_Options_Reference.md** — AI/LLM/Agent options and usage guidance ([see AI Options Reference](./docs/AI_Options_Reference.md))
+- **learnings/** — Engineering and project learnings, tips, and best practices ([see learnings/](./learnings/))
 
 ## Quick Start (VS Code)
 
@@ -47,3 +48,5 @@ Company Relationships Graph is a full-stack web application designed to help use
 - **Agentic Capabilities:** Azure AI Agents and Foundry Local agents enable more dynamic, context-aware responses, improving the depth of insights.
 - **User Experience:** The React frontend, with model selection and error feedback, makes the tool accessible to both technical and non-technical users.
 - **Extensibility:** The architecture supports easy addition of new data sources, models, or visualization features.
+
+
