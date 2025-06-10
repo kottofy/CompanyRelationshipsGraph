@@ -17,6 +17,11 @@
 - Always test prompts with a variety of inputs to ensure robustness and avoid unexpected or biased outputs.
 - Validate that the model’s responses match the intended format and content, especially when integrating with downstream systems.
 
+## Model Choice for Code Generation
+- When using Claude Sonnet 3.7 to generate frontend code, it often produced TypeScript code with many errors and incompatibilities for this project.
+- Switching to GPT-4.1 (due to hitting the API rate limit for Claude) resulted in much cleaner, working code and allowed the site to function as intended.
+- This experience highlighted the importance of matching the model and language to the project’s actual requirements, and not assuming all LLMs or code outputs are equally reliable.
+
 ## Takeaways
 - Treat prompt engineering as a core part of the development process, not an afterthought.
 - Use AI assistants to enhance creativity and productivity, but always review and validate their suggestions.

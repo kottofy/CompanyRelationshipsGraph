@@ -21,6 +21,10 @@
 - As a result, outputs such as company or account logo URLs may become outdated or incorrect if the underlying data is not refreshed or updated locally.
 - For use cases requiring always up-to-date information (e.g., latest logos, news, or live data), additional data synchronization or hybrid approaches may be necessary.
 
+## Platform Support Limitation
+- As of this project, Foundry Local is not currently supported on Linux. It is available for Windows and MacOS, but Linux users will need to wait for future releases or seek alternative solutions.
+- This limitation can impact development and deployment choices such as Dev Containers, especially for teams or environments that rely on Linux infrastructure.
+
 ## Model Behavior Observations
 - Some models, such as Deepseek, may not always follow prompt instructions strictly. For example, even when prompted to return only a JSON array, Deepseek sometimes included a "thinking" or reasoning section in its output.
 - This highlights the importance of robust post-processing and validation when integrating LLM outputs into applications, especially when strict formatting is required.
